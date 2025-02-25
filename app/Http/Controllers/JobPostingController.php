@@ -37,6 +37,7 @@ class JobPostingController extends Controller
 
         JobPosting::create([
             'employer_id' => Auth::id(),
+            'employer_name' => Auth::user()->name,
             'title' => $request->title,
             'description' => $request->description,
             'role' => $request->role,
@@ -58,11 +59,11 @@ class JobPostingController extends Controller
     return redirect()->route('Employer.dashboard')->with('success', 'Job posted successfully!');
 
     }
-    public function allJobs()
-    {
-        $jobs = JobPosting::all(); // Get all job postings
-        return Inertia::render('Dashboard', ['jobs' => $jobs]);
-    }
-    
+  public function allJobs()
+{
+    $jobs = JobPosting::all(); // Get all job postings
+    return Inertia::render('Dashboard', ['jobs' => $jobs]);
+}
+
     
 }

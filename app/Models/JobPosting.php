@@ -13,7 +13,7 @@ class JobPosting extends Model
     
     public function employer()
     {
-        return $this->belongsTo(User::class, 'employer_id');
+        $jobs = JobPosting::with('employer:id,name')->get();
     }
 
     public function index()

@@ -7,6 +7,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JobPostingController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+// use App\Http\Controllers\JobPostingController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -18,37 +20,47 @@ Route::get('/', function () {
     ]);
 });
 
-// Authenticated Routes
+// Grouped Routes with Authentication Middleware
 Route::middleware(['auth'])->group(function () {
     
-    // General Dashboard Route (Redirects to role-based dashboards)
+    // General dashboard route (Redirects to role-based dashboards)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Admin Dashboard
-    Route::get('/admin/dashboard', function () {
+    Route::get('/Admin/dashboard', function () {
         return Inertia::render('Admin/Dashboard');
-    })->name('admin.dashboard');
-
-    // Employer Routes
-    Route::prefix('employer')->name('employer.')->group(function () {
-        Route::get('/dashboard', function () {
-            return Inertia::render('Employer/Dashboard');
-        })->name('dashboard');
-
-        Route::get('/job-postings', [JobPostingController::class, 'index'])->name('job_postings');
-        Route::get('/job-postings/create', [JobPostingController::class, 'create'])->name('job_postings.create');
-        Route::post('/job-postings', [JobPostingController::class, 'store'])->name('job_postings.store');
+    })->name('admin.dashboard')->middleware('auth');
+   
+    //employer
+ 
+    Route::get('/employer/dashboard', function () {
+        return Inertia::render('Employer/dashboard');
+    })->name('employer.dashboard')->middleware('auth');
+    
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/employer/job-postings', [JobPostingController::class, 'index'])->name('employer.job_postings');
+        Route::get('/employer/job-postings/create', [JobPostingController::class, 'create'])->name('employer.job_postings.create');
+        Route::post('/employer/job-postings', [JobPostingController::class, 'store'])->name('employer.job_postings.store');
+    });
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('job_postings', JobPostingController::class);
     });
 
-    // Job Seeker Dashboard - Displays All Job Postings
-    Route::get('/job_seeker/dashboard', [JobPostingController::class, 'allJobs'])->name('job_seeker.dashboard');
+    // Job Seeker Dashboard
+    Route::get('/job_seeker/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('job_seeker.dashboard')->middleware('auth');
+    Route::get('/dashboard', [JobPostingController::class, 'allJobs'])->name('dashboard');
+    
+  
 
     // Profile Routes
-    Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
-        Route::patch('/', [ProfileController::class, 'update'])->name('update');
-        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
-    });
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+Route::middleware(['auth'])->group(function () {
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 require __DIR__.'/auth.php';

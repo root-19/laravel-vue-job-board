@@ -21,6 +21,7 @@ defineProps({ jobs: Array });
         <!-- Job List (One Job per Row) -->
         <div class="space-y-8">
             <div v-for="job in jobs" :key="job.id" class="p-6 border rounded-lg shadow-md bg-gray-50 hover:shadow-lg transition">
+                <!-- <p><strong>Employer:</strong> {{ job.employer.name }}</p> -->
                 <h3 class="text-2xl font-semibold text-gray-900 mb-2">{{ job.title }}</h3>
                 <p class="text-lg font-medium text-gray-600">{{ job.role }}</p>
                 <p class="mt-2 text-gray-700 leading-relaxed">{{ job.description }}</p>

@@ -1,63 +1,74 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Display the user's profile.
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => session('status'),
-        ]);
-    }
-
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        return Redirect::route('profile.edit');
-    }
-
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
 
-        Auth::logout();
+        return Inertia::render('Profile/Edit', [
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
+            'status' => session('status'),
+            'user' => [
+                'name' => $user->name,
+                'role' => $user->role,
+                'profile_image' => $user->profile_image ? asset('storage/' . $user->profile_image) : null,
+                'cover_image' => $user->cover_image ? asset('storage/' . $user->cover_image) : null,
+            ],
+        ]);
+    }
 
-        $user->delete();
+    /**
+     * Update the user's profile images.
+     */
+    public function update(Request $request)
+    {
+        $user = Auth::user();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // Validate inputs
+        $request->validate([
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-        return Redirect::to('/');
+        $updateData = [];
+
+        // Handle profile image upload
+        if ($request->hasFile('profile_image')) {
+            if ($user->profile_image) {
+                Storage::disk('public')->delete($user->profile_image);
+            }
+            $profilePath = $request->file('profile_image')->store('profile_images', 'public');
+            $updateData['profile_image'] = $profilePath;
+        }
+
+        // Handle cover image upload
+        if ($request->hasFile('cover_image')) {
+            if ($user->cover_image) {
+                Storage::disk('public')->delete($user->cover_image);
+            }
+            $coverPath = $request->file('cover_image')->store('profile_images', 'public');
+            $updateData['cover_image'] = $coverPath;
+        }
+
+        // Debugging: Log the update data
+        \Log::info('Profile Update Data:', $updateData);
+
+        if (!empty($updateData)) {
+            $user->update($updateData);
+        }
+
+        return Redirect::route('profile.edit')->with('success', 'Profile updated successfully!');
     }
 }

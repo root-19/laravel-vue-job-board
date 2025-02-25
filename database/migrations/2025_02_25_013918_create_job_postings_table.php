@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('title'); // Job title
             $table->text('description'); // Job description
             $table->string('role'); // Job role
+            $table->string('employer_name');
             $table->text('skills'); // Required skills
             $table->text('qualifications'); // Required qualifications
             $table->string('image')->nullable(); // Optional image
