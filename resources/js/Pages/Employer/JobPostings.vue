@@ -1,20 +1,24 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { defineProps } from 'vue';
-
-defineProps({
-    jobs: Array
-});
+import { useForm } from '@inertiajs/vue3';
+import EmployerAuthenticatedLayout from '@/Layouts/EmployerAuthenticatedLayout.vue';
+defineProps({ jobs: Array });
 </script>
-
 <template>
-    <Head title="Dashboard" />
+       <EmployerAuthenticatedLayout> 
+    <div class="p-6 bg-white shadow-lg rounded-lg max-w-5xl mx-auto mt-10">
+        <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">
+            {{ jobs && jobs.length > 0 ? 'Your Job Postings' : 'No Job Postings Yet' }}
+        </h2>
 
-    <AuthenticatedLayout>
-        <div class="max-w-5xl mx-auto p-8 bg-gray-100 min-h-screen">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Available Job Postings</h1>
-            <!-- Job List (One Job per Row) -->
+        <!-- "Create a Job Posting" button (Always Visible) -->
+        <div class="text-center mb-6">
+            <a href="/employer/job-postings/create" 
+               class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
+                Create a Job Posting
+            </a>
+        </div>
+
+        <!-- Job List (One Job per Row) -->
         <div class="space-y-8">
             <div v-for="job in jobs" :key="job.id" class="p-6 border rounded-lg shadow-md bg-gray-50 hover:shadow-lg transition">
                 <h3 class="text-2xl font-semibold text-gray-900 mb-2">{{ job.title }}</h3>
@@ -34,22 +38,15 @@ defineProps({
                 </div>
 
                 <!-- Job Image (Always Below) -->
-                <div v-if="job.image" class="mt-5 flex justify-center">
-    <div class="text-center">
-        <p class="text-sm font-semibold text-gray-800 mb-2">🖼️ Job Image:</p>
-        <img 
-            :src="'/storage/' + job.image" 
-            alt="Job Image" 
-            class="rounded-lg max-w-full md:max-w-lg mx-auto"
-        >
-    </div>
-</div>
-
+                <div v-if="job.image" class="mt-5">
+                    <p class="text-sm font-semibold text-gray-800 mb-2">🖼️ Job Image:</p>
+                    <img :src="'/storage/' + job.image" 
+                         alt="Job Image" 
+                         class="rounded-lg max-w-full md:max-w-lg">
+                </div>
             </div>
         </div>
-
-            
-        </div>
-    </AuthenticatedLayout>
+    </div>
+</EmployerAuthenticatedLayout>
 </template>
 

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -30,10 +29,11 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirect based on role
+        $user = Auth::user();
+        return redirect()->intended($this->redirectBasedOnRole($user));
     }
 
     /**
@@ -41,12 +41,32 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user(); // Store the user before logout
+    
         Auth::guard('web')->logout();
-
+    
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
-        return redirect('/');
+    
+        // Redirect based on the previous role before logout
+        return redirect()->intended($user ? $this->redirectBasedOnRole($user) : '/');
     }
+    
+
+    /**
+     * Determine redirection based on user role.
+     */
+
+     protected function redirectBasedOnRole($user)
+{
+    return match ($user->role) {
+        'admin' => route('admin.dashboard'),
+        'employer' => route('employer.dashboard'), // Fix capitalization
+        'job_seeker' => route('job_seeker.dashboard'),
+        default => route('dashboard'),
+    };
+}
+
+     
+     
 }
