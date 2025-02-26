@@ -61,7 +61,7 @@ class AuthenticatedSessionController extends Controller
 {
     return match ($user->role) {
         'admin' => route('admin.dashboard'),
-        'employer' => route('employer.dashboard'), // Fix capitalization
+        'employer' => route('employer.home'),
         'job_seeker' => route('job_seeker.dashboard'),
         default => route('dashboard'),
     };

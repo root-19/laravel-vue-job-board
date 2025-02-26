@@ -25,41 +25,53 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Handle an incoming registration request using Validator.
      */
     public function store(Request $request): RedirectResponse
     {
-        $validatedData = $request->validate([
+        // Manually validate the request
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|in:job_seeker,employer', 
+            'role' => 'required|in:job_seeker,employer',
         ]);
-        
+
+        // If validation fails, return with errors
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // Retrieve validated data
+        $validatedData = $validator->validated();
+
+        // Create the user
         $user = User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
             'password' => Hash::make($validatedData['password']),
-            'role' => $validatedData['role'], // ✅ Now it exists
+            'role' => $validatedData['role'],
         ]);
 
+        // Fire the registered event
         event(new Registered($user));
 
+        // Log in the user
         Auth::login($user);
 
+        // Redirect based on role
         return redirect($this->redirectBasedOnRole($user));
-
     }
-    
-    protected function redirectBasedOnRole($user)
-{
-    return match ($user->role) {
-        'employer' => route('employer.dashboard'),
-        'job_seeker' => route('job_seeker.dashboard'),
-        default => route('dashboard'),
-    };
-}
 
-}  
+    /**
+     * Determine redirection based on user role.
+     */
+    protected function redirectBasedOnRole($user)
+    {
+        return match ($user->role) {
+            'employer' => route('employer.home'),
+            'job_seeker' => route('job_seeker.dashboard'),
+            default => route('dashboard'),
+        };
+    }
+}

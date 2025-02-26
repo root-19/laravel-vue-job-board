@@ -32,9 +32,9 @@ class JobPostingController extends Controller
             'qualifications' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-
+    
         $imagePath = $request->file('image') ? $request->file('image')->store('job_images', 'public') : null;
-
+    
         JobPosting::create([
             'employer_id' => Auth::id(),
             'employer_name' => Auth::user()->name,
@@ -44,21 +44,12 @@ class JobPostingController extends Controller
             'skills' => $request->skills,
             'qualifications' => $request->qualifications,
             'image' => $imagePath,
-    
         ]);
-
-        $data = $request->except('image');
-
-    if ($request->hasFile('image')) {
-        $data['image'] = $request->file('image')->store('job_images', 'public');
+    
+        return redirect()->route('Employer.dashboard')->with('success', 'Job posted successfully!');
     }
+    
 
-    $data['employer_id'] = auth()->id(); 
-    JobPosting::create($data);
-
-    return redirect()->route('Employer.dashboard')->with('success', 'Job posted successfully!');
-
-    }
   public function allJobs()
 {
     $jobs = JobPosting::all(); // Get all job postings

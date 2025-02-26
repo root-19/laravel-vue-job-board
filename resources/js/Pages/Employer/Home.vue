@@ -1,6 +1,14 @@
 <script setup>
 import EmployerAuthenticatedLayout from '@/Layouts/EmployerAuthenticatedLayout.vue';
+// import EmployerAuthenticatedLayout from '../../Layouts/EmployerAuthenticatedLayout.vue';
+import { defineProps } from 'vue';
+
+defineProps({
+    jobs: Array
+});
 import { Head } from '@inertiajs/vue3';
+
+
 </script>
 
 <template>

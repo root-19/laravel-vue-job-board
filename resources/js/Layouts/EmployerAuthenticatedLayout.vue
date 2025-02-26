@@ -34,10 +34,10 @@ const showingNavigationDropdown = ref(false);
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
                                 <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
+                                    :href="route('employer.home')"
+                                    :active="route().current('home')"
                                 >
-                                    Dashboard
+                                  Home
                                 </NavLink>
                                 <NavLink
         :href="route('job_postings.index')" 
@@ -58,6 +58,11 @@ const showingNavigationDropdown = ref(false);
                                                 type="button"
                                                 class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
                                             >
+                                             <img 
+                                               :src="'/storage/' + $page.props.auth.user.profile_image" 
+                                             alt="Profile Image" 
+                                         class="w-8 h-8 rounded-full me-2 border border-gray-300 shadow-sm"
+                                                   />
                                                 {{ $page.props.auth.user.name }}
 
                                                 <svg
@@ -78,7 +83,8 @@ const showingNavigationDropdown = ref(false);
 
                                     <template #content>
                                         <DropdownLink
-                                            :href="route('profile.edit')"
+                                            :href="route('employer.edit')"
+                                            
                                         >
                                             Profile
                                         </DropdownLink>
@@ -147,8 +153,8 @@ const showingNavigationDropdown = ref(false);
                 >
                     <div class="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
+                            :href="route('home')"
+                            :active="route().current('home')"
                         >
                             Dashboard
                         </ResponsiveNavLink>
